@@ -1,5 +1,10 @@
 package me.arycer.dam.util;
 
+/**
+ * Clase que representa un par de objetos
+ * @param <TLeft> Tipo del objeto izquierdo
+ * @param <TRight> Tipo del objeto derecho
+ */
 public class Pair<TLeft, TRight> {
     private TLeft left;
     private TRight right;

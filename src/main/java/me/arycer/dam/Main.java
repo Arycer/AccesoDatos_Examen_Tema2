@@ -86,6 +86,7 @@ public class Main {
 
         final List<Pair<Integer, Double>> CLIENTES_GASTO = new ArrayList<>();
 
+        // Leer todos los pedidos
         for (Pedido pedido : pedidosDAO.read()) {
             for (DetallesPedido detallesPedido : detallesPedidoDAO.getDetallesByIdPedido(pedido.getId())) {
                 double precio = 0;
@@ -97,12 +98,14 @@ public class Main {
                     // Ignorar
                 }
 
+                // Sumar todos los precios de los productos
                 CLIENTES_GASTO.add(new Pair<>(pedido.getId_cliente(), precio * detallesPedido.getCantidad()));
             }
         }
 
         final List<Pair<Integer, Double>> CLIENTES_GASTO_AGRUPADO = new ArrayList<>();
 
+        // Agrupar los gastos por cliente
         for (Pair<Integer, Double> pair : CLIENTES_GASTO) {
             boolean found = false;
 
@@ -119,6 +122,7 @@ public class Main {
             }
         }
 
+        // Ordenar la lista de mayor a menor
         CLIENTES_GASTO_AGRUPADO.sort((o1, o2) -> Double.compare(o2.getRight(), o1.getRight()));
 
         for (Pair<Integer, Double> pair : CLIENTES_GASTO_AGRUPADO) {
@@ -141,9 +145,11 @@ public class Main {
         ClientesDAO clientesDAO = new ClientesDAOImpl();
         ProductosDAO productosDAO = new ProductosDAOImpl();
 
+        // Leer todos los pedidos
         for (Pedido pedido : pedidosDAO.read()) {
             String display_cliente;
 
+            // Obtener el nombre del cliente
             try {
                 Cliente cliente = clientesDAO.getClienteById(pedido.getId_cliente());
                 display_cliente = "Nombre cliente: %s".formatted(cliente.getNombre());
@@ -157,6 +163,7 @@ public class Main {
             for (DetallesPedido detallesPedido : detallesPedidoDAO.getDetallesByIdPedido(pedido.getId())) {
                 String display_producto;
 
+                // Obtener el nombre del producto
                 try {
                     Producto producto = productosDAO.getProductoById(detallesPedido.getId_producto());
                     display_producto = "Nombre producto: %s".formatted(producto.getNombre());
