@@ -92,7 +92,7 @@ public class Main {
                 double precio = 0;
 
                 try {
-                    Producto producto = productosDAO.getProductoById(detallesPedido.getId_pedido());
+                    Producto producto = productosDAO.getProductoById(detallesPedido.getId_producto());
                     precio = producto.getPrecio();
                 } catch (ProductoNoExistenteException e) {
                     // Ignorar
