@@ -52,7 +52,7 @@ public class ProductosDAOImpl implements ProductosDAO {
     public List<Producto> read() {
         final List<Producto> LISTA = new ArrayList<>();
         final String SQL = """
-                SELECT * FROM pedidos
+                SELECT * FROM productos
                 """;
 
         try (Statement st = connection.createStatement()) {
