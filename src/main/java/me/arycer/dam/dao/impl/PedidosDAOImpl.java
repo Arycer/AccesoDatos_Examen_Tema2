@@ -4,18 +4,16 @@ import me.arycer.dam.dao.DetallesPedidoDAO;
 import me.arycer.dam.dao.PedidosDAO;
 import me.arycer.dam.dao.ProductosDAO;
 import me.arycer.dam.database.DBConnection;
-import me.arycer.dam.exception.ClienteNoExistenteException;
 import me.arycer.dam.exception.PedidoNoExistenteException;
-import me.arycer.dam.model.Cliente;
 import me.arycer.dam.model.Pedido;
 import me.arycer.dam.model.Producto;
-import me.arycer.dam.util.Pair;
 
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class PedidosDAOImpl implements PedidosDAO {
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -221,7 +219,7 @@ public class PedidosDAOImpl implements PedidosDAO {
     }
 
     @Override
-    public void crearPedidoCliente(int id_cliente, String fecha, List<Pair<Integer, Integer>> productos_pedido) {
+    public void crearPedidoCliente(int id_cliente, String fecha, Map<Integer, Integer> productos_pedido) {
         ProductosDAO productosDAO = new ProductosDAOImpl();
         Pedido pedido;
 
@@ -241,12 +239,12 @@ public class PedidosDAOImpl implements PedidosDAO {
             connection.setAutoCommit(false);
 
             // ID Producto, Cantidad
-            for (Pair<Integer, Integer> producto_cantidad : productos_pedido) {
-                Producto producto = productosDAO.getProductoById(producto_cantidad.getLeft());
+            for (Map.Entry<Integer, Integer> producto_cantidad : productos_pedido.entrySet()) {
+                Producto producto = productosDAO.getProductoById(producto_cantidad.getKey());
 
                 st.setInt(1, pedido.getId());
                 st.setInt(2, producto.getId());
-                st.setInt(3, producto_cantidad.getRight());
+                st.setInt(3, producto_cantidad.getValue());
 
                 st.executeUpdate();
             }

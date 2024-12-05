@@ -14,11 +14,8 @@ import me.arycer.dam.model.Cliente;
 import me.arycer.dam.model.DetallesPedido;
 import me.arycer.dam.model.Pedido;
 import me.arycer.dam.model.Producto;
-import me.arycer.dam.util.Pair;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
     private static final Scanner SCANNER = new Scanner(System.in);
@@ -84,7 +81,8 @@ public class Main {
         ProductosDAO productosDAO = new ProductosDAOImpl();
         ClientesDAO clientesDAO = new ClientesDAOImpl();
 
-        final List<Pair<Integer, Double>> CLIENTES_GASTO = new ArrayList<>();
+        // Mapa para almacenar el gasto total por cliente
+        final Map<Integer, Double> clientesGasto = new HashMap<>();
 
         // Leer todos los pedidos
         for (Pedido pedido : pedidosDAO.read()) {
@@ -98,44 +96,28 @@ public class Main {
                     // Ignorar
                 }
 
-                // Sumar todos los precios de los productos
-                CLIENTES_GASTO.add(new Pair<>(pedido.getId_cliente(), precio * detallesPedido.getCantidad()));
+                // Actualizar el gasto total del cliente en el mapa
+                double importe = precio * detallesPedido.getCantidad();
+                clientesGasto.merge(pedido.getId_cliente(), importe, Double::sum);
             }
         }
 
-        final List<Pair<Integer, Double>> CLIENTES_GASTO_AGRUPADO = new ArrayList<>();
+        // Convertir el mapa en una lista para ordenarlo
+        List<Map.Entry<Integer, Double>> clientesGastoOrdenado = new ArrayList<>(clientesGasto.entrySet());
+        clientesGastoOrdenado.sort((o1, o2) -> Double.compare(o2.getValue(), o1.getValue()));
 
-        // Agrupar los gastos por cliente
-        for (Pair<Integer, Double> pair : CLIENTES_GASTO) {
-            boolean found = false;
-
-            for (Pair<Integer, Double> pair_agrupado : CLIENTES_GASTO_AGRUPADO) {
-                if (pair.getLeft().equals(pair_agrupado.getLeft())) {
-                    pair_agrupado.setRight(pair_agrupado.getRight() + pair.getRight());
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) {
-                CLIENTES_GASTO_AGRUPADO.add(pair);
-            }
-        }
-
-        // Ordenar la lista de mayor a menor
-        CLIENTES_GASTO_AGRUPADO.sort((o1, o2) -> Double.compare(o2.getRight(), o1.getRight()));
-
-        for (Pair<Integer, Double> pair : CLIENTES_GASTO_AGRUPADO) {
+        // Mostrar los resultados
+        for (Map.Entry<Integer, Double> entry : clientesGastoOrdenado) {
             String displayCliente;
 
             try {
-                Cliente cliente = clientesDAO.getClienteById(pair.getLeft());
+                Cliente cliente = clientesDAO.getClienteById(entry.getKey());
                 displayCliente = "Nombre cliente: %s".formatted(cliente.getNombre());
             } catch (ClienteNoExistenteException e) {
-                displayCliente = "ID Cliente: %s".formatted(pair.getLeft());
+                displayCliente = "ID Cliente: %s".formatted(entry.getKey());
             }
 
-            System.out.printf("%s, Total gastado: %.2f\n", displayCliente, pair.getRight());
+            System.out.printf("%s, Total gastado: %.2f\n", displayCliente, entry.getValue());
         }
     }
 
@@ -188,6 +170,7 @@ public class Main {
         int id_cliente = SCANNER.nextInt();
         System.out.println();
 
+        // Validar si el cliente existe
         try {
             clientesDAO.getClienteById(id_cliente);
         } catch (ClienteNoExistenteException e) {
@@ -195,8 +178,8 @@ public class Main {
             return;
         }
 
-        // ID Producto, cantidad
-        List<Pair<Integer, Integer>> productos_cantidad = new ArrayList<>();
+        // Mapa para almacenar productos y cantidades
+        final Map<Integer, Integer> PRODUCTOS_CANTIDAD = new HashMap<>();
 
         int id_producto;
         do {
@@ -208,6 +191,7 @@ public class Main {
                 continue;
             }
 
+            // Validar si el producto existe
             try {
                 productosDAO.getProductoById(id_producto);
             } catch (ProductoNoExistenteException e) {
@@ -219,14 +203,17 @@ public class Main {
             int cantidad = SCANNER.nextInt();
             System.out.println();
 
-            productos_cantidad.add(new Pair<>(id_producto, cantidad));
+            // Actualizar la cantidad en el mapa
+            PRODUCTOS_CANTIDAD.merge(id_producto, cantidad, Integer::sum);
         } while (id_producto != -1);
 
+        // Pedir la fecha del pedido
         System.out.print("Introduce la fecha de compra: ");
         String fecha = SCANNER.next();
         System.out.println();
 
-        pedidosDAO.crearPedidoCliente(id_cliente, fecha, productos_cantidad);
+        // Crear el pedido en la base de datos
+        pedidosDAO.crearPedidoCliente(id_cliente, fecha, PRODUCTOS_CANTIDAD);
 
         System.out.println("Pedido creado correctamente");
     }

@@ -3,9 +3,9 @@ package me.arycer.dam.dao;
 import me.arycer.dam.exception.ClienteNoExistenteException;
 import me.arycer.dam.exception.PedidoNoExistenteException;
 import me.arycer.dam.model.Pedido;
-import me.arycer.dam.util.Pair;
 
 import java.util.List;
+import java.util.Map;
 
 public interface PedidosDAO extends CrudDAO<Pedido> {
     /**
@@ -46,5 +46,5 @@ public interface PedidosDAO extends CrudDAO<Pedido> {
      * @param productos_pedido lista de pares de id_producto y cantidad
      * @throws ClienteNoExistenteException si el cliente no existe
      */
-    void crearPedidoCliente(int id_cliente, String fecha, List<Pair<Integer, Integer>> productos_pedido) throws ClienteNoExistenteException;
+    void crearPedidoCliente(int id_cliente, String fecha, Map<Integer, Integer> productos_pedido) throws ClienteNoExistenteException;
 }
