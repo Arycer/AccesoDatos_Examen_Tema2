@@ -20,14 +20,14 @@ public interface CrudDAO<T> {
     List<T> read();
 
     /**
-     * Lee un dato por su id
-     * @param dato Dato a leer
+     * Actualiza un dato
+     * @param dato Dato a actualizar
      */
     void update(T dato);
 
     /**
-     * Actualiza un dato
-     * @param id Id del dato a actualizar
+     * Elimina un dato
+     * @param id Id del dato a eliminar
      */
     void delete(int id);
 }
